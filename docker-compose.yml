@@ -52,6 +52,33 @@ services:
     env_file:
       - .env
     
+  carts-db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=carts_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - carts_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  cart-service:
+    build: './services/cart service'
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - './services/cart service:/app'
+    ports:
+      - "8003:8000"
+    depends_on:
+      carts-db:
+        condition: service_healthy
+    env_file:
+      - .env
+  
   gateway:
     build: ./services/gateway
     ports:
@@ -59,8 +86,9 @@ services:
     depends_on:
       - user-services
       - product-service
-
+      - cart-service
 
 volumes:
   users_data:
   products_data:
+  carts_data:
