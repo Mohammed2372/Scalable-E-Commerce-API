@@ -52,6 +52,14 @@ services:
     env_file:
       - .env
     
+  gateway:
+    build: ./services/gateway
+    ports:
+      - "8080:80"
+    depends_on:
+      - user-services
+      - product-service
+
 
 volumes:
   users_data:
