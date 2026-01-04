@@ -5,6 +5,7 @@ from rest_framework.decorators import action
 from .models import Order, OrderItem
 from .serializers import OrderSerializer
 from .services import CartService, ProductService
+from producer import publish_order_created
 
 
 # Create your views here.
@@ -70,6 +71,17 @@ class OrderViewSet(ModelViewSet):
 
             # clear the cart
             CartService.clear_cart(user_id=user_id)
+
+            # async notification with RabbitMQ
+            publish_order_created(
+                {
+                    "order_id": order.id,
+                    "user_id": user_id,
+                    "total_price": total_price,
+                    "status": "completed",
+                    "email": request.data.get("email", ""),
+                }
+            )
 
             return Response(
                 {
