@@ -1,4 +1,15 @@
 services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    ports:
+      - "5672:5672"   # The port for Python to talk to
+      - "15672:15672" # The GUI Dashboard (User/Pass: guest/guest)
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
   users-db:
     image: postgres:15-alpine
     environment:
@@ -105,6 +116,12 @@ services:
         condition: service_healthy
     env_file:
       - .env
+
+  notification-service:
+    build: './services/notification service'
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
 
   gateway:
     build: ./services/gateway
