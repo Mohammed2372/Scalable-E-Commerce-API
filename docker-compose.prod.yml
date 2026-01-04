@@ -1,0 +1,109 @@
+version: '3.8'
+
+services:
+  # ----------------------------
+  # CORE SERVICES (Databases)
+  # ----------------------------
+  users-db:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: users_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - users_data:/var/lib/postgresql/data
+
+  products-db:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: products_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - products_data:/var/lib/postgresql/data
+
+  cart-db:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: cart_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - cart_data:/var/lib/postgresql/data
+
+  orders-db:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: orders_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - orders_data:/var/lib/postgresql/data
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  # ----------------------------
+  # YOUR APP SERVICES
+  # ----------------------------
+  user-service:
+    image: mohammed237/user-service:v1
+    ports:
+      - "8001:8000"
+    depends_on:
+      - users-db
+
+  product-service:
+    image: mohammed237/product-service:v1
+    ports:
+      - "8002:8000"
+    depends_on:
+      - products-db
+      - redis
+
+  cart-service:
+    image: mohammed237/cart-service:v1
+    ports:
+      - "8003:8000"
+    depends_on:
+      - cart-db
+
+  order-service:
+    image: mohammed237/order-service:v1
+    ports:
+      - "8004:8000"
+    depends_on:
+      - orders-db
+      - rabbitmq
+
+  notification-service:
+    image: mohammed237/notification-service:v1
+    depends_on:
+      - rabbitmq
+
+  # ----------------------------
+  # API GATEWAY
+  # ----------------------------
+  api-gateway:
+    build: ./nginx
+    ports:
+      - "8080:80"
+    depends_on:
+      - user-service
+      - product-service
+      - cart-service
+      - order-service
+
+volumes:
+  users_data:
+  products_data:
+  cart_data:
+  orders_data:
