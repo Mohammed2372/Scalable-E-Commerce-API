@@ -10,6 +10,12 @@ services:
       timeout: 10s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    restart: always
+
   users-db:
     image: postgres:15-alpine
     environment:
