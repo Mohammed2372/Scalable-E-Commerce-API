@@ -79,6 +79,33 @@ services:
     env_file:
       - .env
   
+  orders-db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=orders_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - orders_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    
+  order-service:
+    build: './services/order service'
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - './services/order service:/app'
+    ports:
+      - "8004:8000"
+    depends_on:
+      orders-db:
+        condition: service_healthy
+    env_file:
+      - .env
+
   gateway:
     build: ./services/gateway
     ports:
@@ -87,8 +114,10 @@ services:
       - user-services
       - product-service
       - cart-service
+      - order-service
 
 volumes:
   users_data:
   products_data:
   carts_data:
+  orders_data:
