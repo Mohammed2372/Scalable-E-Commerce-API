@@ -13,7 +13,7 @@ class Cart(Model):
 
 
 class CartItem(Model):
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="items")
     product_id = models.IntegerField()
     quantity = models.PositiveIntegerField(default=1)
 
