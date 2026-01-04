@@ -53,3 +53,14 @@ class CartViewSet(ViewSet):
         item.save()
 
         return Response({"message": "Item added", "product": product_data["name"]})
+
+    @action(detail=False, methods=["post"])
+    def clear_cart(self, request):
+        user_id = request.data.get("user_id")
+
+        if not user_id:
+            return Response({"error": "User ID is required"}, status=400)
+
+        CartItem.objects.filter(cart__user_id=user_id).delete()
+
+        return Response({"message": "Cart cleared successfully"})

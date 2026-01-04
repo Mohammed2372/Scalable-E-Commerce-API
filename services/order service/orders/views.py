@@ -1,4 +1,3 @@
-from rest_framework import status
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -70,7 +69,7 @@ class OrderViewSet(ModelViewSet):
                 )
 
             # clear the cart
-            # CartService.clear_cart(user_id=user_id)
+            CartService.clear_cart(user_id=user_id)
 
             return Response(
                 {
