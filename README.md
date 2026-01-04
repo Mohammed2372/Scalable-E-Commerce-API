@@ -24,6 +24,64 @@ A high-performance, event-driven e-commerce backend built with **Django**, **Rab
 
 ## 🏗 Architecture
 
+```mermaid
+graph TB
+  Client[Client/Browser]
+
+  subgraph "API Gateway Layer"
+      Gateway[Nginx Gateway<br/>Port 8000]
+  end
+
+  subgraph "Microservices Layer"
+      UserService[User Service<br/>JWT Auth]
+      ProductService[Product Service<br/>Catalog Management]
+      CartService[Cart Service<br/>Shopping Cart]
+      OrderService[Order Service<br/>Order Processing]
+      NotificationService[Notification Service<br/>Email Worker]
+  end
+
+  subgraph "Data Layer"
+      UserDB[(PostgreSQL<br/>User DB)]
+      ProductDB[(PostgreSQL<br/>Product DB)]
+      CartDB[(PostgreSQL<br/>Cart DB)]
+      OrderDB[(PostgreSQL<br/>Order DB)]
+  end
+
+  subgraph "Cache & Message Layer"
+      Redis[(Redis Cache<br/>1ms latency)]
+      RabbitMQ[RabbitMQ<br/>Message Broker]
+  end
+
+  Client --> Gateway
+  Gateway --> UserService
+  Gateway --> ProductService
+  Gateway --> CartService
+  Gateway --> OrderService
+
+  UserService --> UserDB
+  ProductService --> ProductDB
+  ProductService --> Redis
+  CartService --> CartDB
+  OrderService --> OrderDB
+  OrderService --> RabbitMQ
+  RabbitMQ --> NotificationService
+
+  style Gateway fill:#009639,color:#fff
+  style UserService fill:#092E20,color:#fff
+  style ProductService fill:#092E20,color:#fff
+  style CartService fill:#092E20,color:#fff
+  style OrderService fill:#092E20,color:#fff
+  style NotificationService fill:#092E20,color:#fff
+  style Redis fill:#DC382D,color:#fff
+  style RabbitMQ fill:#FF6600,color:#fff
+  style UserDB fill:#336791,color:#fff
+  style ProductDB fill:#336791,color:#fff
+  style CartDB fill:#336791,color:#fff
+  style OrderDB fill:#336791,color:#fff
+```
+
+### Architecture Components
+
 The system follows a **`Microservices Architecture`** with the following components:
 
 - **API Gateway (Nginx):** Single entry point routing traffic to internal services
