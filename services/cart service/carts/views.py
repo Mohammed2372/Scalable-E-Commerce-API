@@ -55,7 +55,7 @@ class CartViewSet(ViewSet):
         return Response({"message": "Item added", "product": product_data["name"]})
 
     @action(detail=False, methods=["post"])
-    def clear_cart(self, request):
+    def clear(self, request):
         user_id = request.data.get("user_id")
 
         if not user_id:
